@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 
 type Props = {
   time: number
@@ -17,7 +17,7 @@ export const Timer = ({ time, started, onTick }: Props) => {
       clearInterval(intId)
     }
     return () => clearInterval(intId)
-  }, [started])
+  }, [started, onTick])
 
   return (
     <div className="pb-6">
