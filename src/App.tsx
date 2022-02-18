@@ -42,6 +42,7 @@ import {
 import './App.css'
 import { AlertContainer } from './components/alerts/AlertContainer'
 import { useAlert } from './context/AlertContext'
+import { Timer } from './components/timer/Timer'
 
 function App() {
   const prefersDarkMode = window.matchMedia(
@@ -52,6 +53,7 @@ function App() {
     useAlert()
   const [currentGuess, setCurrentGuess] = useState('')
   const [isGameWon, setIsGameWon] = useState(false)
+  const [hasGuessingStarted, setHasGuessingStarted] = useState(false)
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false)
   const [isStatsModalOpen, setIsStatsModalOpen] = useState(false)
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
@@ -87,6 +89,7 @@ function App() {
   })
 
   const [stats, setStats] = useState(() => loadStats())
+  const [time, setTime] = useState(0)
 
   const [isHardMode, setIsHardMode] = useState(
     localStorage.getItem('gameMode')
@@ -156,7 +159,7 @@ function App() {
         setIsStatsModalOpen(true)
       }, GAME_LOST_INFO_DELAY)
     }
-  }, [isGameWon, isGameLost, showSuccessAlert])
+  }, [isGameWon, isGameLost, showSuccessAlert, hasGuessingStarted])
 
   const onChar = (value: string) => {
     if (
@@ -173,6 +176,10 @@ function App() {
   }
 
   const onEnter = () => {
+    if (guesses.length === 0) {
+      setHasGuessingStarted(true)
+    }
+
     if (isGameWon || isGameLost) {
       return
     }
@@ -222,19 +229,25 @@ function App() {
       setCurrentGuess('')
 
       if (winningWord) {
-        setStats(addStatsForCompletedGame(stats, guesses.length))
+        setStats(addStatsForCompletedGame(stats, guesses.length, time))
+        setHasGuessingStarted(false)
         return setIsGameWon(true)
       }
 
       if (guesses.length === MAX_CHALLENGES - 1) {
-        setStats(addStatsForCompletedGame(stats, guesses.length + 1))
+        setStats(addStatsForCompletedGame(stats, guesses.length + 1, time))
         setIsGameLost(true)
+        setHasGuessingStarted(false)
         showErrorAlert(CORRECT_WORD_MESSAGE(solution), {
           persist: true,
           delayMs: REVEAL_TIME_MS * MAX_WORD_LENGTH + 1,
         })
       }
     }
+  }
+
+  const onTick = () => {
+    setTime((prevTime) => prevTime + 1)
   }
 
   return (
@@ -256,6 +269,7 @@ function App() {
           onClick={() => setIsSettingsModalOpen(true)}
         />
       </div>
+      <Timer time={time} started={hasGuessingStarted} onTick={onTick}></Timer>
       <Grid
         guesses={guesses}
         currentGuess={currentGuess}
@@ -282,6 +296,7 @@ function App() {
         isGameWon={isGameWon}
         handleShare={() => showSuccessAlert(GAME_COPIED_MESSAGE)}
         isHardMode={isHardMode}
+        time={time}
       />
       <SettingsModal
         isOpen={isSettingsModalOpen}

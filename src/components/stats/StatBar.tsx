@@ -4,6 +4,7 @@ import {
   SUCCESS_RATE_TEXT,
   CURRENT_STREAK_TEXT,
   BEST_STREAK_TEXT,
+  AVERAGE_TIME_TEXT,
 } from '../../constants/strings'
 
 type Props = {
@@ -32,6 +33,7 @@ export const StatBar = ({ gameStats }: Props) => {
       <StatItem label={SUCCESS_RATE_TEXT} value={`${gameStats.successRate}%`} />
       <StatItem label={CURRENT_STREAK_TEXT} value={gameStats.currentStreak} />
       <StatItem label={BEST_STREAK_TEXT} value={gameStats.bestStreak} />
+      <StatItem label={AVERAGE_TIME_TEXT} value={gameStats.averageTime} />
     </div>
   )
 }
